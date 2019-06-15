@@ -12,85 +12,57 @@ const UPLOAD_RECENT_CLIPS = true;
 /* CODE GOES BELOW */
 /*******************/
 
-const { execSync } = require("child_process");
+const { execSync, spawnSync } = require("child_process");
 const moment = require("moment");
 const fs = require("fs");
 const rimraf = require("rimraf");
 const { terminal } = require("terminal-kit");
-const {
-    SharedKeyCredential,
-    StorageURL,
-    ServiceURL,
-    ContainerURL,
-    uploadFileToBlockBlob,
-    Aborter,
-    BlockBlobURL
-} = require("@azure/storage-blob");
 
 const TESLACAM_FOLDER = `${USB_MOUNT_FOLDER}/TeslaCam`;
 const SAVED_CLIPS = "SavedClips";
 const RECENT_CLIPS = "RecentClips";
 const UPLOAD_DELAY_MINUTES = 5;
 
-const containerUrl = getAzureBlobContainerUrl();
-
 (async function () {
     log("Starting");
 
-    try {
-        unmountDevice();
-    } catch { }
+    unmountDevices();
 
     try {
-        mountDevice();
+        mountDevices();
 
         await processSavedClips();
         await processRecentClips();
-    } catch (e) {
-        console.log(e);
     } finally {
-        unmountDevice();
+        unmountDevices();
         reloadMassStorage();
 
         log("Completed");
     }
 })();
 
-async function processFile(file, progressLogger) {
-    // const blockBlobUrl = BlockBlobURL.fromContainerURL(containerUrl, file.name);
-
-    // await uploadFileToBlockBlob(Aborter.none, file.path, blockBlobUrl, {
-    //     progress: progressLogger
-    // });
-
+async function processFile(file) {
     fs.copyFileSync(file.path, `${FILE_DESTINATION_PATH}/${file.name}`);
     progressLogger({ loadedBytes: file.size });
-    
+
     fs.unlinkSync(file.path);
 }
 
 async function processFolder(folder) {
-    terminal("Uploading folder ").green(folder.name)("\n");
+    terminal("Copying folder ").green(folder.name)("\n");
 
     const filesInFolder = getFolderContents(folder.path);
 
     for (let i = 0; i < filesInFolder.length; i++) {
         const file = filesInFolder[i];
 
-        await processFile(file, (ev) => {
-            const percentage = Math.round(ev.loadedBytes / file.size * 100);
-
-            terminal.saveCursor();
-            terminal(`Uploading file ${i + 1}/${filesInFolder.length} (${percentage}%)...`);
-            terminal.restoreCursor();
-        });
-
-        console.log();
+        terminal("Copying file ").green(`${i + 1}/${filesInFolder.length}`)("\n");
+        processFile(file);
     }
 
     rimraf.sync(folder.path);
 
-    terminal("Uploaded folder ").green(folder.name)("\n");
+    terminal("Copied folder ").green(folder.name)("\n");
 }
 
 async function processRecentClips() {
@@ -111,15 +83,8 @@ async function processRecentClips() {
     for (let i = 0; i < recentClips.length; i++) {
         const file = recentClips[i];
 
-        await processFile(file, (ev) => {
-            const percentage = Math.round(ev.loadedBytes / file.size * 100);
-
-            terminal.saveCursor();
-            terminal(`Uploading file ${i + 1}/${recentClips.length} (${percentage}%)...`);
-            terminal.restoreCursor();
-        });
-
-        console.log();
+        terminal("Copying file ").green(`${i + 1}/${recentClips.length}`)("\n");
+        processFile(file);
     }
 
     terminal("Processed ").green("recent")(" clips\n");
@@ -168,12 +133,14 @@ function getFolderContents(path) {
     });
 }
 
-function unmountDevice() {
-    execSync(`umount ${USB_DEVICE_PATH}`);
+function unmountDevices() {
+    spawnSync("umount", [FILE_DESTINATION_PATH]);
+    spawnSync("umount", [USB_DEVICE_PATH]);
 }
 
-function mountDevice() {
-    execSync(`mount ${USB_DEVICE_PATH}`);
+function mountDevices() {
+    spawnSync("mount", [USB_DEVICE_PATH]);
+    spawnSync("mount", [FILE_DESTINATION_PATH]);
 }
 
 function reloadMassStorage() {
