@@ -4,7 +4,7 @@ export default class System {
     private mountPaths: string[];
 
     constructor(mountPaths: string[]) {
-        this.mountPaths =  mountPaths;
+        this.mountPaths = mountPaths;
     }
 
     public unmountDevices() {
