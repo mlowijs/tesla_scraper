@@ -1,0 +1,5 @@
+usbMountFolder: "/mnt/usb"
+processDelayMinutes: 5 # only process clips older than x minutes
+savedClipsArchiveMode: "upload" # delete / upload / skip
+recentClipsArchiveMode: "delete"
+nfsFileDestinationPath: "/mnt/nfs"
