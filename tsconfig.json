@@ -5,7 +5,7 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "strict": true,
-        "target": "es6"
+        "target": "es2018"
     },
     "include": [
         "**/*.ts"
