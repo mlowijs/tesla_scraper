@@ -2,13 +2,13 @@ import System from "./System";
 import { FilesystemFileUploader } from "./FileUploader";
 import getSettings from "./Settings";
 import ClipProcessor from "./ClipProcessor";
-import * as pino from "pino";
+import pino from "pino";
 
 const settings = getSettings();
 const logger = pino();
 
-const system = new System([settings.usbMountFolder, settings.nfsFileDestinationPath]);
-const fileUploader = new FilesystemFileUploader(settings.nfsFileDestinationPath);
+const system = new System([settings.usbMountFolder, settings.nfsFileDestinationPath!]);
+const fileUploader = new FilesystemFileUploader(settings.nfsFileDestinationPath!);
 const clipProcessor = new ClipProcessor(logger, settings, fileUploader);
 
 function main() {

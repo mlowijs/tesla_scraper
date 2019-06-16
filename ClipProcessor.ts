@@ -2,7 +2,6 @@ import { Settings, ArchiveMode } from "./Settings";
 import { Logger } from "pino";
 import Filesystem, { File } from "./Filesystem";
 import moment = require("moment");
-import rimraf = require("rimraf");
 import { FileUploader } from "./FileUploader";
 
 const SAVED_CLIPS = "SavedClips";
@@ -29,7 +28,7 @@ export default class ClipProcessor {
         }
         
         const path = `${this.teslacamFolder}/${SAVED_CLIPS}`;
-    
+
         if (!Filesystem.exists(path)) {
             this.logger.info("No saved clips found");
             return false;
@@ -58,8 +57,15 @@ export default class ClipProcessor {
             this.logger.info("Skipping recent clips");
             return false;
         }
-    
+
         const path = `${this.teslacamFolder}/${RECENT_CLIPS}`;
+
+        if (this.settings.recentClipsArchiveMode === ArchiveMode.DELETE) {
+            this.logger.info("Deleting recent clips");
+
+            Filesystem.deleteFolder(path);
+            return true;
+        }
     
         if (!Filesystem.exists(path)) {
             this.logger.info("No recent clips found");
@@ -89,6 +95,12 @@ export default class ClipProcessor {
     }
 
     private processSavedClipsFolder(folder: File) {
+        if (this.settings.savedClipsArchiveMode === ArchiveMode.DELETE) {
+            this.logger.info("Deleting folder '%s'", folder.name);
+
+            Filesystem.deleteFolder(folder.path);
+        }
+
         this.logger.info("Processing folder '%s'", folder.name);
     
         const filesInFolder = Filesystem.getFolderContents(folder.path);
@@ -100,7 +112,7 @@ export default class ClipProcessor {
             this.processFile(file);
         }
     
-        rimraf.sync(folder.path);
+        Filesystem.deleteFolder(folder.path);
     
         this.logger.info("Processed folder '%s'", folder.name);
     }

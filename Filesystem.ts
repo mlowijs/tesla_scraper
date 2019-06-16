@@ -1,5 +1,6 @@
 import moment, { Moment } from "moment";
 import * as fs from "fs";
+import rimraf = require("rimraf");
 
 export interface File {
     name: string;
@@ -26,6 +27,10 @@ export default class Filesystem {
 
     public static deleteFile(file: File) {
         fs.unlinkSync(file.path);
+    }
+
+    public static deleteFolder(folder: string) {
+        rimraf.sync(folder);
     }
 
     public static exists(path: string) {
