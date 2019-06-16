@@ -1,10 +1,6 @@
 const USB_DEVICE_PATH = "/usbfs";
 const USB_MOUNT_FOLDER = "/mnt/usbfs";
-const AZURE_STORAGE_ACCOUNT_NAME = "mlcloudshell";
-const AZURE_STORAGE_ACCESS_KEY = "klT6UHqrz+7IFpNmuPgx5j0J3CDt6Loz9AGVp2TZk1qAMktIPf6qF6cWpO2m8wNwcGG5bGAyMfY7iuKwLaOQZA==";
-const AZURE_STORAGE_CONTAINER_NAME = "teslacam";
 const FILE_DESTINATION_PATH = "/mnt/nfs";
-
 const UPLOAD_SAVED_CLIPS = true;
 const UPLOAD_RECENT_CLIPS = true;
 
@@ -16,7 +12,7 @@ const { execSync, spawnSync } = require("child_process");
 const moment = require("moment");
 const fs = require("fs");
 const rimraf = require("rimraf");
-const { terminal } = require("terminal-kit");
+const logger = require("pino")();
 
 const TESLACAM_FOLDER = `${USB_MOUNT_FOLDER}/TeslaCam`;
 const SAVED_CLIPS = "SavedClips";
@@ -24,20 +20,25 @@ const RECENT_CLIPS = "RecentClips";
 const UPLOAD_DELAY_MINUTES = 5;
 
 (async function () {
-    log("Starting");
+    logger.info("Starting");
 
     unmountDevices();
 
     try {
-        mountDevices();
+        if (!mountDevices()) {
+            logger.fatal("Could not mount devices");
+            return;
+        }
 
         await processSavedClips();
         await processRecentClips();
+
+        logger.info("Completed");
+    } catch (e) {
+        logger.error(e.message);
     } finally {
         unmountDevices();
         reloadMassStorage();
-
-        log("Completed");
     }
 })();
 
@@ -49,20 +50,20 @@ async function processFile(file) {
 }
 
 async function processFolder(folder) {
-    terminal("Copying folder ").green(folder.name)("\n");
+    logger.info("Processing folder '%s'", folder.name);
 
     const filesInFolder = getFolderContents(folder.path);
 
     for (let i = 0; i < filesInFolder.length; i++) {
         const file = filesInFolder[i];
 
-        terminal("Copying file ").green(`${i + 1}/${filesInFolder.length}`)("\n");
+        logger.info("Copying file %d/%d", i + 1, filesInFolder.length);
         processFile(file);
     }
 
     rimraf.sync(folder.path);
 
-    terminal("Copied folder ").green(folder.name)("\n");
+    logger.info("Processed folder '%s'", folder.name);
 }
 
 async function processRecentClips() {
@@ -78,16 +79,16 @@ async function processRecentClips() {
     const recentClips = getFolderContents(path)
         .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= UPLOAD_DELAY_MINUTES);
 
-    terminal("Processing ").green("recent")(" clips\n");
+        logger.info("Processing recent clips");
 
     for (let i = 0; i < recentClips.length; i++) {
         const file = recentClips[i];
 
-        terminal("Copying file ").green(`${i + 1}/${recentClips.length}`)("\n");
+        logger.info("Copying file %d/%d", i + 1, recentClips.length);
         processFile(file);
     }
 
-    terminal("Processed ").green("recent")(" clips\n");
+    logger.info("Processed recent clips");
 }
 
 async function processSavedClips() {
@@ -103,25 +104,18 @@ async function processSavedClips() {
     const savedClipsFolders = getFolderContents(path)
         .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= UPLOAD_DELAY_MINUTES);
 
-    terminal("Processing ").green("saved")(" clips\n");
+    logger.info("Processing saved clips");
 
     for (const folder of savedClipsFolders)
         await processFolder(folder);
 
-    terminal("Processed ").green("saved")(" clips\n");
-}
-
-function getAzureBlobContainerUrl() {
-    const credentials = new SharedKeyCredential(AZURE_STORAGE_ACCOUNT_NAME, AZURE_STORAGE_ACCESS_KEY);
-    const pipeline = StorageURL.newPipeline(credentials);
-    const serviceUrl = new ServiceURL(`https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`, pipeline);
-
-    return ContainerURL.fromServiceURL(serviceUrl, AZURE_STORAGE_CONTAINER_NAME);
+    logger.info("Processed saved clips");
 }
 
 function getFolderContents(path) {
     const entries = fs.readdirSync(path);
-    return entries.map(f => {
+    
+    return entries.filter(f => f.endsWith(".mp4")).map(f => {
         const filePath = `${path}/${f}`;
 
         return {
@@ -139,15 +133,16 @@ function unmountDevices() {
 }
 
 function mountDevices() {
-    spawnSync("mount", [USB_DEVICE_PATH]);
-    spawnSync("mount", [FILE_DESTINATION_PATH]);
+    if (spawnSync("mount", [USB_DEVICE_PATH]).error)
+        return false;
+
+    if (spawnSync("mount", [FILE_DESTINATION_PATH]).error)
+        return false;
+
+    return true;
 }
 
 function reloadMassStorage() {
     execSync(`sudo modprobe -r g_mass_storage`);
     execSync(`sudo modprobe g_mass_storage`);
-}
-
-function log(text) {
-    terminal(text + "\n");
 }

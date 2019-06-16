@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "moment": "^2.24.0"
+    "@azure/storage-blob": "^10.3.0",
+    "moment": "^2.24.0",
+    "pino": "^5.12.6",
+    "rimraf": "^2.6.3",
+    "terminal-kit": "^1.28.1"
   }
 }
