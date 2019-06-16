@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as YAML from "yaml";
 
 export interface Settings {
+    logLevel: string;
     usbMountFolder: string;
     processDelayMinutes: number;
     savedClipsArchiveMode: ArchiveMode;

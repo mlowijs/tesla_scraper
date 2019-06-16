@@ -5,9 +5,11 @@ import ClipProcessor from "./ClipProcessor";
 import pino from "pino";
 
 const settings = getSettings();
-const logger = pino();
+const logger = pino({
+    level: settings.logLevel
+});
 
-const system = new System([settings.usbMountFolder, settings.nfsFileDestinationPath!]);
+const system = new System(logger, [settings.usbMountFolder, settings.nfsFileDestinationPath!]);
 const fileUploader = new FilesystemFileUploader(settings.nfsFileDestinationPath!);
 const clipProcessor = new ClipProcessor(logger, settings, fileUploader);
 
