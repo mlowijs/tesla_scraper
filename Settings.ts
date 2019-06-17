@@ -1,14 +1,15 @@
 import * as fs from "fs";
 import * as YAML from "yaml";
 
+const SETTINGS_FILE_NAME = "settings.yml";
+
 export interface Settings {
     logLevel: string;
     usbMountFolder: string;
     processDelayMinutes: number;
     savedClipsArchiveMode: ArchiveMode;
     recentClipsArchiveMode: ArchiveMode;
-    
-    nfsFileDestinationPath?: string;
+    mountPaths: string[];
 }
 
 export enum ArchiveMode {
@@ -18,7 +19,7 @@ export enum ArchiveMode {
 }
 
 export default function getSettings(): Settings {
-    const data = fs.readFileSync("settings.yml", "utf8");
+    const data = fs.readFileSync(SETTINGS_FILE_NAME, "utf8");
 
     return YAML.parse(data) as Settings;
 }

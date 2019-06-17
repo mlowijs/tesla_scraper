@@ -9,8 +9,8 @@ const logger = pino({
     level: settings.logLevel
 });
 
-const system = new System(logger, [settings.usbMountFolder, settings.nfsFileDestinationPath!]);
-const fileUploader = new FilesystemFileUploader(settings.nfsFileDestinationPath!);
+const fileUploader = new FilesystemFileUploader(settings.mountPaths[0]);
+const system = new System(logger, [settings.usbMountFolder, ...settings.mountPaths]);
 const clipProcessor = new ClipProcessor(logger, settings, fileUploader);
 
 function main() {

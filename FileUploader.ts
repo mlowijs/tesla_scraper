@@ -2,11 +2,11 @@ import { File } from "./Filesystem";
 import * as fs from "fs";
 
 export interface FileUploader {
-    uploadFile: (file: File) => Boolean;
+    uploadFile: (file: File) => boolean;
 }
 
 export class FilesystemFileUploader implements FileUploader {
-    private folder: string;
+    private readonly folder: string;
 
     constructor(folder: string) {
         this.folder = folder;
