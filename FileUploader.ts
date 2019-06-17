@@ -1,5 +1,4 @@
-import { File } from "./Filesystem";
-import * as fs from "fs";
+import Filesystem, { File } from "./Filesystem";
 
 export interface FileUploader {
     uploadFile: (file: File) => boolean;
@@ -13,7 +12,7 @@ export class FilesystemFileUploader implements FileUploader {
     }
 
     public uploadFile(file: File) {
-        fs.copyFileSync(file.path, `${this.folder}/${file.name}`);
+        Filesystem.copyFile(file, this.folder);
 
         return true;
     }

@@ -1,5 +1,6 @@
 logLevel: "debug"
 usbMountFolder: "/mnt/usbfs"
+archiveFolder: "/cache"
 processDelayMinutes: 5 # only process clips older than x minutes
 savedClipsArchiveMode: "upload" # delete / upload / skip
 recentClipsArchiveMode: "skip"

@@ -3,30 +3,21 @@ import { Logger } from "pino";
 
 export default class System {
     private readonly logger: Logger;
-    private readonly mountPaths: string[];
 
-    constructor(logger: Logger, mountPaths: string[]) {
+    constructor(logger: Logger) {
         this.logger = logger;
-        this.mountPaths = mountPaths;
     }
 
-    public unmountDevices() {
-        for (const path of [...this.mountPaths].reverse()) {
-            this.logger.debug("Unmounting '%s'", path);
-
-            spawnSync("umount", [path]);
-        }
+    public unmountDevice(path: string) {
+        this.logger.debug("Unmounting '%s'", path);
+        spawnSync("umount", [path]);
     }
 
-    public mountDevices() {
-        for (const path of this.mountPaths) {
-            this.logger.debug("Mounting '%s'", path);
+    public mountDevice(path: string) {
+        this.logger.debug("Mounting '%s'", path);
 
-            if (spawnSync("mount", [path]).error)
-                throw Error(`Could not mount '${path}'`);
-        }
-
-        return true;
+        if (spawnSync("mount", [path]).error)
+            throw Error(`Could not mount '${path}'`);
     }
 
     public reloadMassStorage() {

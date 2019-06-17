@@ -9,11 +9,13 @@
     "moment": "^2.24.0",
     "pino": "^5.12.6",
     "rimraf": "^2.6.3",
-    "yaml": "^1.6.0"
+    "yaml": "^1.6.0",
+    "yargs": "^13.2.4"
   },
   "devDependencies": {
     "@types/pino": "^5.8.8",
     "@types/rimraf": "^2.0.2",
-    "@types/yaml": "^1.0.2"
+    "@types/yaml": "^1.0.2",
+    "@types/yargs": "^13.0.0"
   }
 }

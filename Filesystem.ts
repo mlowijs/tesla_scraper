@@ -13,7 +13,7 @@ export default class Filesystem {
     public static getFolderContents(path: string): File[] {
         const entries = fs.readdirSync(path);
     
-        return entries.filter(f => f.endsWith(".mp4")).map(f => {
+        return entries.map(f => {
             const filePath = `${path}/${f}`;
     
             return {
@@ -35,5 +35,9 @@ export default class Filesystem {
 
     public static exists(path: string) {
         return fs.existsSync(path);
+    }
+
+    public static copyFile(file: File, destinationFolder: string) {
+        fs.copyFileSync(file.path, `${destinationFolder}/${file.name}`);
     }
 }

@@ -1,11 +1,9 @@
 import { Settings, ArchiveMode } from "./Settings";
 import { Logger } from "pino";
 import Filesystem, { File } from "./Filesystem";
-import moment = require("moment");
+import moment from "moment";
 import { FileUploader } from "./FileUploader";
-
-const SAVED_CLIPS = "SavedClips";
-const RECENT_CLIPS = "RecentClips";
+import { SAVED_CLIPS, RECENT_CLIPS } from "./Constants";
 
 export default class ClipProcessor {
     private readonly logger: Logger;

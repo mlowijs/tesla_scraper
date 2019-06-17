@@ -6,6 +6,7 @@ const SETTINGS_FILE_NAME = "settings.yml";
 export interface Settings {
     logLevel: string;
     usbMountFolder: string;
+    archiveFolder: string;
     processDelayMinutes: number;
     savedClipsArchiveMode: ArchiveMode;
     recentClipsArchiveMode: ArchiveMode;
