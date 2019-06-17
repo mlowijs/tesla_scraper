@@ -23,7 +23,7 @@ export default class System {
             this.logger.debug("Mounting '%s'", path);
 
             if (spawnSync("mount", [path]).error)
-                return false;
+                throw Error(`Could not mount '${path}'`);
         }
 
         return true;

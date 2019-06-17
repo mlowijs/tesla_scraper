@@ -20,16 +20,13 @@ function main() {
     system.unmountDevices();
 
     try {
-        if (!system.mountDevices()) {
-            logger.fatal("Could not mount devices");
-            return;
-        }
+        system.mountDevices();
 
         didProcess = clipProcessor.processSavedClips() || clipProcessor.processRecentClips();
 
         logger.info("Completed");
     } catch (e) {
-        logger.error(e.message);
+        logger.fatal(e.message);
     } finally {
         system.unmountDevices();
 
