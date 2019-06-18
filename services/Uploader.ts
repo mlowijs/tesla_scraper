@@ -2,7 +2,8 @@ import { Logger } from "pino";
 import { Settings } from "./Settings";
 import System from "./System";
 import { FileUploader } from "./FileUploader";
-import FileSystem from "./FileSystem";
+import FileSystem, { File } from "./FileSystem";
+import { TESLA_CAM, SAVED_CLIPS } from "../Constants";
 
 export default class Uploader {
     private readonly logger: Logger;
@@ -45,7 +46,29 @@ export default class Uploader {
     }
 
     private uploadSavedClips() {
+        const { logger, settings } = this;
 
+        logger.info("Starting upload saved clips");
+
+        const path = `${settings.usbMountFolder}/${TESLA_CAM}/${SAVED_CLIPS}`;
+        const savedClipsFolders = FileSystem.getFolderContents(path);
+
+        for (let i = 0; i < savedClipsFolders.length; i++) {
+            const folder = savedClipsFolders[i];
+
+            logger.info("Uploading folder '%s' (%d/%d)", folder.name, i + 1, savedClipsFolders.length);
+
+            this.uploadSavedClipsFolder(folder);
+        }
+
+        logger.info("Upload saved clips completed");
+    }
+
+    private uploadSavedClipsFolder(folder: File) {
+        const { fileUploader } = this;
+
+        const files = FileSystem.getFolderContents(folder.path);
+        fileUploader.uploadFiles(files);
     }
 
     private uploadArchivedClips() {
