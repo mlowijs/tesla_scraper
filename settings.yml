@@ -2,6 +2,6 @@ logLevel: "debug"
 usbMountFolder: "/mnt/usbfs"
 archiveFolder: "/cache"
 processDelayMinutes: 5
-filesystemFileUploader:
+fileSystemFileUploader:
   path: "/mnt/nfs"
   requiresMount: true

@@ -17,7 +17,7 @@ export default class FileSystemFileUploader implements FileUploader {
 
     constructor(logger: Logger, settings: Settings, system: System) {
         this.logger = logger;
-        this.settings = settings.filesystemFileUploader as FileSystemFileUploaderSettings;
+        this.settings = settings.fileSystemFileUploader as FileSystemFileUploaderSettings;
         this.system = system;
     }
 

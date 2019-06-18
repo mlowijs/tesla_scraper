@@ -12,12 +12,6 @@ export interface Settings {
     processDelayMinutes: number;
 }
 
-export enum ArchiveMode {
-    DELETE = "delete",
-    SKIP = "skip",
-    UPLOAD = "upload"
-}
-
 export default function getSettings(): Settings {
     const data = fs.readFileSync(SETTINGS_FILE_NAME, "utf8");
 
