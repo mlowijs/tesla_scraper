@@ -1,5 +1,5 @@
-import { File } from "./FileSystem";
+import { FileSystemEntry } from "./FileSystem";
 
 export interface FileUploader {
-    uploadFiles: (files: File[]) => void;
+    uploadFiles: (files: FileSystemEntry[]) => void;
 }

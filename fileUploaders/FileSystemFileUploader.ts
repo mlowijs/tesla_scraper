@@ -1,7 +1,7 @@
 import { FileUploader } from "../services/FileUploader";
 import { Settings } from "../services/Settings";
 import FileSystem from "../services/FileSystem";
-import { File } from "../services/FileSystem";
+import { FileSystemEntry } from "../services/FileSystem";
 import System from "../services/System";
 import { Logger } from "pino";
 
@@ -21,7 +21,7 @@ export default class FileSystemFileUploader implements FileUploader {
         this.system = system;
     }
 
-    public uploadFiles(files: File[]) {
+    public uploadFiles(files: FileSystemEntry[]) {
         const { logger, settings, system } = this;
 
         try {

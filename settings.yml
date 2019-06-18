@@ -1,7 +1,7 @@
 logLevel: "debug"
 usbMountFolder: "/mnt/usbfs"
 archiveFolder: "/cache"
-processDelayMinutes: 5 # only process clips older than x minutes
+processDelayMinutes: 5
 filesystemFileUploader:
   path: "/mnt/nfs"
   requiresMount: true

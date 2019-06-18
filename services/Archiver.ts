@@ -46,6 +46,11 @@ export default class Archiver {
 
         const recentClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${RECENT_CLIPS}`;
 
+        if (!FileSystem.exists(recentClipsPath)) {
+            logger.info("No recent clips found");
+            return;
+        }
+
         const now = moment();
         const files = FileSystem.getFolderContents(recentClipsPath)
             .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= settings.processDelayMinutes);

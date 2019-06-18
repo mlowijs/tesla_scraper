@@ -2,7 +2,7 @@ import moment, { Moment } from "moment";
 import * as fs from "fs";
 import rimraf = require("rimraf");
 
-export interface File {
+export interface FileSystemEntry {
     name: string;
     path: string;
     date: Moment;
@@ -10,7 +10,7 @@ export interface File {
 }
 
 export default class FileSystem {
-    public static getFolderContents(path: string): File[] {
+    public static getFolderContents(path: string): FileSystemEntry[] {
         const entries = fs.readdirSync(path);
     
         return entries.map(f => {
@@ -25,19 +25,19 @@ export default class FileSystem {
         });
     }
 
-    public static deleteFile(file: File) {
+    public static deleteFile(file: FileSystemEntry) {
         fs.unlinkSync(file.path);
     }
 
-    public static deleteFolder(folder: string) {
-        rimraf.sync(folder);
+    public static deleteFolder(path: string) {
+        rimraf.sync(path);
     }
 
     public static exists(path: string) {
         return fs.existsSync(path);
     }
 
-    public static copyFile(file: File, destinationFolder: string) {
+    public static copyFile(file: FileSystemEntry, destinationFolder: string) {
         fs.copyFileSync(file.path, `${destinationFolder}/${file.name}`);
     }
 }
