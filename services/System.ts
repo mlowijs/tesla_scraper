@@ -8,16 +8,20 @@ export default class System {
         this.logger = logger;
     }
 
-    public unmountDevice(path: string) {
-        this.logger.debug("Unmounting '%s'", path);
-        spawnSync("umount", [path]);
+    public unmountDevices(...paths: string[]) {
+        for (const path of paths) {
+            this.logger.debug("Unmounting '%s'", path);
+            spawnSync("umount", [path]);
+        }
     }
 
-    public mountDevice(path: string) {
-        this.logger.debug("Mounting '%s'", path);
+    public mountDevices(...paths: string[]) {
+        for (const path of paths) {
+            this.logger.debug("Mounting '%s'", path);
 
-        if (spawnSync("mount", [path]).error)
-            throw Error(`Could not mount '${path}'`);
+            if (spawnSync("mount", [path]).error)
+                throw Error(`Could not mount '${path}'`);
+        }
     }
 
     public reloadMassStorage() {

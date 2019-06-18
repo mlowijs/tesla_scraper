@@ -9,7 +9,7 @@ export interface File {
     size: number;
 }
 
-export default class Filesystem {
+export default class FileSystem {
     public static getFolderContents(path: string): File[] {
         const entries = fs.readdirSync(path);
     

@@ -1,8 +1,8 @@
 import System from "./System";
 import { Logger } from "pino";
 import { Settings } from "./Settings";
-import Filesystem from "./Filesystem";
-import { TESLA_CAM, RECENT_CLIPS } from "./Constants";
+import FileSystem from "./FileSystem";
+import { TESLA_CAM, RECENT_CLIPS } from "../Constants";
 import moment from "moment";
 
 export default class Archiver {
@@ -18,37 +18,45 @@ export default class Archiver {
 
     public archive() {
         const { logger, settings, system } = this;
+        let success = false;
 
         logger.info("Starting archive");
 
-        system.unmountDevice(settings.usbMountFolder);
+        system.unmountDevices(settings.usbMountFolder);
     
         try {
-            system.mountDevice(settings.usbMountFolder);
+            system.mountDevices(settings.usbMountFolder);
 
             this.archiveRecentClips();
-            this.system.reloadMassStorage();
+            success = true;
 
-            this.logger.info("Archive completed");
+            logger.info("Archive completed");
         } catch (e) {
             logger.fatal(e.message);
         } finally {
-            system.unmountDevice(settings.usbMountFolder);
+            system.unmountDevices(settings.usbMountFolder);
+
+            if (success)
+                system.reloadMassStorage();
         }
     }
 
     private archiveRecentClips() {
-        const { settings } = this;
+        const { logger, settings } = this;
 
         const recentClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${RECENT_CLIPS}`;
 
         const now = moment();
-        const files = Filesystem.getFolderContents(recentClipsPath)
+        const files = FileSystem.getFolderContents(recentClipsPath)
             .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= settings.processDelayMinutes);
 
-        for (const file of files) {
-            Filesystem.copyFile(file, settings.archiveFolder);
-            Filesystem.deleteFile(file);
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            logger.info("Archiving file '%s' (%d/%d)", file.name, i + 1, files.length);
+
+            FileSystem.copyFile(file, settings.archiveFolder);
+            FileSystem.deleteFile(file);
         }
     }
 }

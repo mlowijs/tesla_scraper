@@ -1,14 +1,16 @@
-import System from "./System";
-import { FilesystemFileUploader } from "./FileUploader";
-import getSettings from "./Settings";
-import ClipProcessor from "./ClipProcessor";
+import System from "./services/System";
+import getSettings from "./services/Settings";
 import pino from "pino";
 import * as yargs from "yargs";
-import Archiver from "./Archiver";
-import Uploader from "./Uploader";
+import Archiver from "./services/Archiver";
+import Uploader from "./services/Uploader";
+import FileSystemFileUploader from "./fileUploaders/FileSystemFileUploader";
 
 const argv = yargs.command("archive", "Archive recent clips.")
     .command("upload", "Upload clips.")
+    .demandCommand(1, 1)
+    .scriptName("main.ts")
+    .strict()
     .help()
     .argv;
 
@@ -18,42 +20,17 @@ const logger = pino({
 });
 
 const system = new System(logger);
+const filesystemFileUploader = new FileSystemFileUploader(logger, settings, system);
 
-const archiver = new Archiver(logger, system);
-const uploader = new Uploader();
+const archiver = new Archiver(logger, settings, system);
+const uploader = new Uploader(logger, settings, system, filesystemFileUploader);
 
 function main() {
     if (argv.archive) {
         archiver.archive();
     } else if (argv.upload) {
         uploader.upload();
-    } else {
-        logger.error("Unknown command.");
     }
 }
-
-// function main() {
-    
-
-//     logger.info("Starting");
-//     let didProcess = false;
-
-//     system.unmountDevices();
-
-//     try {
-//         system.mountDevices();
-
-//         didProcess = clipProcessor.processSavedClips() || clipProcessor.processRecentClips();
-
-//         logger.info("Completed");
-//     } catch (e) {
-//         logger.fatal(e.message);
-//     } finally {
-//         system.unmountDevices();
-
-//         if (didProcess)
-//             system.reloadMassStorage();
-//     }
-// }
 
 main();

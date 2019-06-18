@@ -1,123 +1,75 @@
-import { Settings, ArchiveMode } from "./Settings";
-import { Logger } from "pino";
-import Filesystem, { File } from "./Filesystem";
-import moment from "moment";
-import { FileUploader } from "./FileUploader";
-import { SAVED_CLIPS, RECENT_CLIPS } from "./Constants";
+// import { Settings, ArchiveMode } from "./Settings";
+// import { Logger } from "pino";
+// import Filesystem, { File } from "./Filesystem";
+// import moment from "moment";
+// import { FileUploader } from "./FileUploader";
+// import { SAVED_CLIPS, RECENT_CLIPS } from "./Constants";
 
-export default class ClipProcessor {
-    private readonly logger: Logger;
-    private readonly settings: Settings;
-    private readonly fileUploader: FileUploader;
-    private readonly teslacamFolder: string;
+// export default class ClipProcessor {
+//     private readonly logger: Logger;
+//     private readonly settings: Settings;
+//     private readonly fileUploader: FileUploader;
+//     private readonly teslacamFolder: string;
 
-    constructor(logger: Logger, settings: Settings, fileUploader: FileUploader) {
-        this.logger = logger;
-        this.settings = settings;
-        this.fileUploader = fileUploader;
+//     constructor(logger: Logger, settings: Settings, fileUploader: FileUploader) {
+//         this.logger = logger;
+//         this.settings = settings;
+//         this.fileUploader = fileUploader;
 
-        this.teslacamFolder = `${settings.usbMountFolder}/TeslaCam`;
-    }
+//         this.teslacamFolder = `${settings.usbMountFolder}/TeslaCam`;
+//     }
 
-    public processSavedClips(): boolean {
-        if (this.settings.savedClipsArchiveMode === ArchiveMode.SKIP) {
-            this.logger.info("Skipping saved clips");
-            return false;
-        }
+//     public processSavedClips(): boolean {
+//         if (this.settings.savedClipsArchiveMode === ArchiveMode.SKIP) {
+//             this.logger.info("Skipping saved clips");
+//             return false;
+//         }
         
-        const path = `${this.teslacamFolder}/${SAVED_CLIPS}`;
+//         const path = `${this.teslacamFolder}/${SAVED_CLIPS}`;
 
-        if (!Filesystem.exists(path)) {
-            this.logger.info("No saved clips found");
-            return false;
-        }
+//         if (!Filesystem.exists(path)) {
+//             this.logger.info("No saved clips found");
+//             return false;
+//         }
     
-        const now = moment();
-        const savedClipsFolders = Filesystem.getFolderContents(path)
-            .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= this.settings.processDelayMinutes);
+//         const now = moment();
+//         const savedClipsFolders = Filesystem.getFolderContents(path)
+//             .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= this.settings.processDelayMinutes);
     
-        if (savedClipsFolders.length === 0) {
-            this.logger.info("No saved clips found");
-            return false;
-        }
+//         if (savedClipsFolders.length === 0) {
+//             this.logger.info("No saved clips found");
+//             return false;
+//         }
     
-        this.logger.info("Processing saved clips");
+//         this.logger.info("Processing saved clips");
     
-        for (const folder of savedClipsFolders)
-            this.processSavedClipsFolder(folder);
+//         for (const folder of savedClipsFolders)
+//             this.processSavedClipsFolder(folder);
     
-        this.logger.info("Processed saved clips");
-        return true;
-    }
+//         this.logger.info("Processed saved clips");
+//         return true;
+//     }
 
-    public processRecentClips(): boolean {
-        if (this.settings.recentClipsArchiveMode === ArchiveMode.SKIP) {
-            this.logger.info("Skipping recent clips");
-            return false;
-        }
+//     private processSavedClipsFolder(folder: File) {
+//         if (this.settings.savedClipsArchiveMode === ArchiveMode.DELETE) {
+//             this.logger.info("Deleting folder '%s'", folder.name);
 
-        const path = `${this.teslacamFolder}/${RECENT_CLIPS}`;
+//             Filesystem.deleteFolder(folder.path);
+//         }
 
-        if (this.settings.recentClipsArchiveMode === ArchiveMode.DELETE) {
-            this.logger.info("Deleting recent clips");
-
-            Filesystem.deleteFolder(path);
-            return true;
-        }
+//         this.logger.info("Processing folder '%s'", folder.name);
     
-        if (!Filesystem.exists(path)) {
-            this.logger.info("No recent clips found");
-            return false;
-        }
+//         const filesInFolder = Filesystem.getFolderContents(folder.path);
     
-        const now = moment();
-        const recentClips = Filesystem.getFolderContents(path)
-            .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= this.settings.processDelayMinutes);
+//         for (let i = 0; i < filesInFolder.length; i++) {
+//             const file = filesInFolder[i];
     
-        if (recentClips.length === 0) {
-            this.logger.info("No recent clips found");
-            return false;
-        }
+//             this.logger.info("Copying file %d/%d", i + 1, filesInFolder.length);
+//             this.processFile(file);
+//         }
     
-        this.logger.info("Processing recent clips");
+//         Filesystem.deleteFolder(folder.path);
     
-        for (let i = 0; i < recentClips.length; i++) {
-            const file = recentClips[i];
-    
-            this.logger.info("Copying file %d/%d", i + 1, recentClips.length);
-            this.processFile(file);
-        }
-    
-        this.logger.info("Processed recent clips");
-        return true;
-    }
-
-    private processSavedClipsFolder(folder: File) {
-        if (this.settings.savedClipsArchiveMode === ArchiveMode.DELETE) {
-            this.logger.info("Deleting folder '%s'", folder.name);
-
-            Filesystem.deleteFolder(folder.path);
-        }
-
-        this.logger.info("Processing folder '%s'", folder.name);
-    
-        const filesInFolder = Filesystem.getFolderContents(folder.path);
-    
-        for (let i = 0; i < filesInFolder.length; i++) {
-            const file = filesInFolder[i];
-    
-            this.logger.info("Copying file %d/%d", i + 1, filesInFolder.length);
-            this.processFile(file);
-        }
-    
-        Filesystem.deleteFolder(folder.path);
-    
-        this.logger.info("Processed folder '%s'", folder.name);
-    }
-
-    private async processFile(file: File) {
-        this.fileUploader.uploadFile(file);
-        
-        Filesystem.deleteFile(file);
-    }
-}
+//         this.logger.info("Processed folder '%s'", folder.name);
+//     }
+// }
