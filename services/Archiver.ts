@@ -23,7 +23,7 @@ export default class Archiver {
         logger.info("Starting archive");
 
         system.unmountDevices(settings.usbMountFolder);
-    
+
         try {
             system.mountDevices(settings.usbMountFolder);
 
@@ -34,10 +34,14 @@ export default class Archiver {
         } catch (e) {
             logger.fatal(e.message);
         } finally {
-            system.unmountDevices(settings.usbMountFolder);
+            try {
+                system.unmountDevices(settings.usbMountFolder);
 
-            if (success)
-                system.reloadMassStorage();
+                if (success)
+                    system.reloadMassStorage();
+            } catch (e) {
+                logger.error(e.message);
+            }
         }
     }
 
