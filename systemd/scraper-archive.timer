@@ -4,8 +4,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Timer]
-OnBootSec=15m
-OnUnitActiveSec=15m
+OnBootSec=2m
+OnUnitActiveSec=30m
 
 [Install]
 WantedBy=timers.target
