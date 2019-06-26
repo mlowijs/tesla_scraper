@@ -27,7 +27,10 @@ export default class System {
     public reloadMassStorage() {
         this.logger.debug("Reloading mass storage");
 
-        spawnSync("sudo", ["modprobe", "-r", "g_mass_storage"]);
-        spawnSync("sudo", ["modprobe", "g_mass_storage"]);
+        if (spawnSync("sudo", ["modprobe", "-r", "g_mass_storage"]).error)
+            throw Error(`Could not remove mass storage module`);
+
+        if (spawnSync("sudo", ["modprobe", "g_mass_storage"]).error)
+            throw Error(`Could not load mass storage module`);
     }
 }
