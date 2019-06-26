@@ -26,9 +26,13 @@ const archiver = new Archiver(logger, settings, system);
 const uploader = new Uploader(logger, settings, system, filesystemFileUploader);
 
 function main() {
-    if (argv.archive) {
+    logger.info("Starting TeslaScraper");
+
+    console.log(argv);
+
+    if (argv._.includes("archive")) {
         archiver.archive();
-    } else if (argv.upload) {
+    } else if (argv._.includes("upload")) {
         uploader.upload();
     }
 }
