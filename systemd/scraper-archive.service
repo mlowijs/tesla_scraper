@@ -6,4 +6,4 @@ User=alarm
 Group=alarm
 Type=simple
 WorkingDirectory=/home/alarm/scraper
-ExecStart=sh -c "/usr/bin/ts-node -T main.ts archive | tee -a /var/log/scraper/scraper.log"
+ExecStart=sh -c "/usr/bin/ts-node -T main.ts archive | tee -a /var/log/scraper/archive.log"

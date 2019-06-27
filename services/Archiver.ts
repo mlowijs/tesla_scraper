@@ -57,6 +57,11 @@ export default class Archiver {
 
         const files = FileSystem.getFolderContents(recentClipsPath);
 
+        if (files.length === 0) {
+            logger.info("No recent clips found");
+            return;
+        }
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 

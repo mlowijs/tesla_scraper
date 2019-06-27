@@ -23,7 +23,7 @@ const system = new System(logger);
 const filesystemFileUploader = new FileSystemFileUploader(logger, settings, system);
 
 const archiver = new Archiver(logger, settings, system);
-const uploader = new Uploader(logger, settings, system, filesystemFileUploader);
+const uploader = new Uploader(logger, settings, filesystemFileUploader);
 
 function main() {
     logger.info("Starting TeslaScraper");

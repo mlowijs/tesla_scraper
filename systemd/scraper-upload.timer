@@ -1,10 +1,10 @@
 [Unit]
-Description=TeslaScraper Archive timer
+Description=TeslaScraper Upload timer
 After=network-online.target
 Wants=network-online.target
 
 [Timer]
-OnBootSec=2m
+OnBootSec=5m
 OnUnitActiveSec=5m
 
 [Install]
