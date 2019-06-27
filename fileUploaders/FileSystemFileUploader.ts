@@ -29,26 +29,25 @@ export default class FileSystemFileUploader implements FileUploader {
                 system.unmountDevices(settings.path);
                 system.mountDevices(settings.path);
             }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+    
+                logger.info("Copying file '%s' (%d/%d)", file.name, i + 1, files.length);
+    
+                try {
+                    FileSystem.copyFile(file, settings.path);
+                } catch (e) {
+                    logger.error("Failed to copy file '%s'", file.name);
+                }
+            }
         } catch (e) {
             logger.error("Mounting file share failed");
+
             return;
         } finally {
-            system.unmountDevices(settings.path);
+            if (settings.requiresMount)
+                system.unmountDevices(settings.path);
         }
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-
-            logger.info("Copying file '%s' (%d/%d)", file.name, i + 1, files.length);
-
-            try {
-                FileSystem.copyFile(file, settings.path);
-            } catch (e) {
-                logger.error("Failed to copy file '%s'", file.name);
-            }
-        }            
-
-        if (settings.requiresMount)
-            system.unmountDevices(settings.path);
     }
 }

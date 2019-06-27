@@ -3,5 +3,5 @@ usbMountFolder: "/mnt/usbfs"
 archiveFolder: "/cache"
 processDelayMinutes: 5
 fileSystemFileUploader:
-  path: "/mnt/nfs"
+  path: "/mnt/stack"
   requiresMount: true

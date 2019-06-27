@@ -1,0 +1,9 @@
+[Unit]
+Description=TeslaScraper Upload
+
+[Service]
+User=alarm
+Group=alarm
+Type=simple
+WorkingDirectory=/home/alarm/scraper
+ExecStart=sh -c "/usr/bin/ts-node -T main.ts upload | tee -a /var/log/scraper/scraper.log"

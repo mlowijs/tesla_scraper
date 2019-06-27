@@ -3,8 +3,6 @@ import { Settings } from "./Settings";
 import System from "./System";
 import { FileUploader } from "./FileUploader";
 import FileSystem, { FileSystemEntry } from "./FileSystem";
-import { TESLA_CAM, SAVED_CLIPS } from "../Constants";
-import moment from "moment";
 
 export default class Uploader {
     private readonly logger: Logger;
@@ -25,13 +23,8 @@ export default class Uploader {
 
         logger.info("Starting upload");
 
-        system.unmountDevices(settings.usbMountFolder);
-
         try {
             this.uploadArchivedClips();
-
-            system.mountDevices(settings.usbMountFolder);
-            this.uploadSavedClips();
             
             success = true;
 
@@ -48,41 +41,6 @@ export default class Uploader {
                 logger.error(e.message);
             }
         }
-    }
-
-    private uploadSavedClips() {
-        const { logger, settings } = this;
-
-        logger.info("Starting upload saved clips");
-
-        const savedClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${SAVED_CLIPS}`;
-
-        if (!FileSystem.exists(savedClipsPath)) {
-            logger.info("No saved clips found");
-            return;
-        }
-
-        const now = moment();
-        const savedClipsFolders = FileSystem.getFolderContents(savedClipsPath)
-            .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= settings.processDelayMinutes);
-
-        for (let i = 0; i < savedClipsFolders.length; i++) {
-            const folder = savedClipsFolders[i];
-
-            logger.info("Uploading folder '%s' (%d/%d)", folder.name, i + 1, savedClipsFolders.length);
-
-            this.uploadSavedClipsFolder(folder);
-            FileSystem.deleteFolder(folder.path);
-        }
-
-        logger.info("Upload saved clips completed");
-    }
-
-    private uploadSavedClipsFolder(folder: FileSystemEntry) {
-        const { fileUploader } = this;
-
-        const files = FileSystem.getFolderContents(folder.path);
-        fileUploader.uploadFiles(files);
     }
 
     private uploadArchivedClips() {

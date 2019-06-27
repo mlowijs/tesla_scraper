@@ -1,9 +1,8 @@
 import System from "./System";
 import { Logger } from "pino";
 import { Settings } from "./Settings";
-import FileSystem from "./FileSystem";
-import { TESLA_CAM, RECENT_CLIPS } from "../Constants";
-import moment from "moment";
+import FileSystem, { FileSystemEntry } from "./FileSystem";
+import { TESLA_CAM, RECENT_CLIPS, SAVED_CLIPS } from "../Constants";
 
 export default class Archiver {
     private readonly logger: Logger;
@@ -28,8 +27,9 @@ export default class Archiver {
             system.mountDevices(settings.usbMountFolder);
 
             this.archiveRecentClips();
-            success = true;
+            this.archiveSavedClips();
 
+            success = true;
             logger.info("Archive completed");
         } catch (e) {
             logger.fatal(e.message);
@@ -55,17 +55,62 @@ export default class Archiver {
             return;
         }
 
-        const now = moment();
-        const files = FileSystem.getFolderContents(recentClipsPath)
-            .filter(f => moment.duration(now.diff(f.date)).asMinutes() >= settings.processDelayMinutes);
+        const files = FileSystem.getFolderContents(recentClipsPath);
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
-            logger.info("Archiving file '%s' (%d/%d)", file.name, i + 1, files.length);
+            logger.info("Archiving recent clip '%s' (%d/%d)", file.name, i + 1, files.length);
 
             FileSystem.copyFile(file, settings.archiveFolder);
             FileSystem.deleteFile(file);
         }
+    }
+
+    private archiveSavedClips() {
+        const { logger, settings } = this;
+
+        const savedClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${SAVED_CLIPS}`;
+
+        if (!FileSystem.exists(savedClipsPath)) {
+            logger.info("No saved clips found");
+            return;
+        }
+
+        const folders = FileSystem.getFolderContents(savedClipsPath);
+
+        if (folders.length === 0) {
+            logger.info("No saved clips found");
+            return;
+        }
+
+        for (let i = 0; i < folders.length; i++) {
+            const folder = folders[i];
+
+            logger.info("Archiving saved clips folder '%s' (%d/%d)", folder.name, i + 1, folders.length);
+
+            this.archiveSavedClipsFolder(folder);
+        }
+    }
+
+    private archiveSavedClipsFolder(folder: FileSystemEntry) {
+        const { logger, settings } = this;
+
+        const files = FileSystem.getFolderContents(folder.path);
+
+        if (files.length === 0) {
+            logger.info("Saved clips folder is empty");
+            return;
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            logger.info("Archiving saved clip '%s' (%d/%d)", file.name, i + 1, files.length);
+
+            FileSystem.copyFile(file, settings.archiveFolder);
+        }
+
+        FileSystem.deleteFolder(folder.path);
     }
 }
