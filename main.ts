@@ -8,6 +8,7 @@ import FileSystemFileUploader from "./fileUploaders/FileSystemFileUploader";
 
 const argv = yargs.command("archive", "Archive recent clips.")
     .command("upload", "Upload clips.")
+    .command("reload", "Reload mass storage.")
     .demandCommand(1, 1)
     .scriptName("main.ts")
     .strict()
@@ -32,6 +33,8 @@ function main() {
         archiver.archive();
     } else if (argv._.includes("upload")) {
         uploader.upload();
+    } else if (argv._.includes("reload")) {
+        system.reloadMassStorage();
     }
 }
 

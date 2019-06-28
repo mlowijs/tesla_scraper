@@ -4,6 +4,8 @@ import { Settings } from "./Settings";
 import FileSystem, { FileSystemEntry } from "./FileSystem";
 import { TESLA_CAM, RECENT_CLIPS, SAVED_CLIPS } from "../Constants";
 
+const ONE_MEGABYTE = 1024 * 1024;
+
 export default class Archiver {
     private readonly logger: Logger;
     private readonly settings: Settings;
@@ -17,7 +19,6 @@ export default class Archiver {
 
     public archive() {
         const { logger, settings, system } = this;
-        let success = false;
 
         logger.info("Starting archive");
 
@@ -29,16 +30,12 @@ export default class Archiver {
             this.archiveRecentClips();
             this.archiveSavedClips();
 
-            success = true;
             logger.info("Archive completed");
         } catch (e) {
             logger.fatal(e.message);
         } finally {
             try {
                 system.unmountDevices(settings.usbMountFolder);
-
-                if (success)
-                    system.reloadMassStorage();
             } catch (e) {
                 logger.error(e.message);
             }
@@ -62,14 +59,7 @@ export default class Archiver {
             return;
         }
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-
-            logger.info("Archiving recent clip '%s' (%d/%d)", file.name, i + 1, files.length);
-
-            FileSystem.copyFile(file, settings.archiveFolder);
-            FileSystem.deleteFile(file);
-        }
+        this.archiveClips(files);
     }
 
     private archiveSavedClips() {
@@ -108,14 +98,23 @@ export default class Archiver {
             return;
         }
 
+        this.archiveClips(files);
+
+        FileSystem.deleteFolder(folder.path);
+    }
+
+    private archiveClips(files: FileSystemEntry[]) {
+        const { logger, settings } = this;
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
-            logger.info("Archiving saved clip '%s' (%d/%d)", file.name, i + 1, files.length);
+            logger.info("Archiving clip '%s' (%d/%d)", file.name, i + 1, files.length);
 
-            FileSystem.copyFile(file, settings.archiveFolder);
+            if (file.size >= ONE_MEGABYTE)
+                FileSystem.copyFile(file, settings.archiveFolder);
+
+            FileSystem.deleteFile(file);
         }
-
-        FileSystem.deleteFolder(folder.path);
     }
 }

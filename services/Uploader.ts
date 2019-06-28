@@ -24,7 +24,7 @@ export default class Uploader {
 
             if (files.length === 0)
                 logger.info("No archived clips found");
-            else    
+            else
                 fileUploader.uploadFiles(files);
 
             logger.info("Upload archived clips completed");
