@@ -2,7 +2,7 @@
 Description=TeslaScraper Archive timer
 
 [Timer]
-OnBootSec=2m
+OnBootSec=15s
 OnUnitActiveSec=5m
 
 [Install]
