@@ -1,0 +1,9 @@
+[Unit]
+Description=TeslaScraper Reload timer
+
+[Timer]
+OnBootSec=50m
+OnUnitActiveSec=50m
+
+[Install]
+WantedBy=timers.target

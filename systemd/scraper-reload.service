@@ -1,0 +1,9 @@
+[Unit]
+Description=TeslaScraper Reload
+
+[Service]
+User=alarm
+Group=alarm
+Type=simple
+WorkingDirectory=/home/alarm/scraper
+ExecStart=sh -c "/usr/bin/ts-node -T main.ts reload | tee -a /var/log/scraper/reload.log"
