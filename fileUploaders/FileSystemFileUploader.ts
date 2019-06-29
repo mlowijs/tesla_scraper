@@ -33,10 +33,11 @@ export default class FileSystemFileUploader implements FileUploader {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
     
-                logger.info("Copying file '%s' (%d/%d)", file.name, i + 1, files.length);
+                logger.info("Uploading file '%s' (%d/%d)", file.name, i + 1, files.length);
     
                 try {
                     FileSystem.copyFile(file, settings.path);
+                    FileSystem.deleteFile(file);
                 } catch (e) {
                     logger.error("Failed to copy file '%s'", file.name);
                 }

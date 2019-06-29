@@ -45,6 +45,8 @@ export default class Archiver {
     private archiveRecentClips() {
         const { logger, settings } = this;
 
+        logger.info("Archiving recent clips");
+
         const recentClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${RECENT_CLIPS}`;
 
         if (!FileSystem.exists(recentClipsPath)) {
@@ -64,6 +66,8 @@ export default class Archiver {
 
     private archiveSavedClips() {
         const { logger, settings } = this;
+
+        logger.info("Archiving saved clips");        
 
         const savedClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${SAVED_CLIPS}`;
 
@@ -89,7 +93,7 @@ export default class Archiver {
     }
 
     private archiveSavedClipsFolder(folder: FileSystemEntry) {
-        const { logger, settings } = this;
+        const { logger } = this;
 
         const files = FileSystem.getFolderContents(folder.path);
 
@@ -109,7 +113,7 @@ export default class Archiver {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
-            logger.info("Archiving clip '%s' (%d/%d)", file.name, i + 1, files.length);
+            logger.info("Archiving clip '%s' (%d bytes) (%d/%d)", file.name, file.size, i + 1, files.length);
 
             if (file.size >= ONE_MEGABYTE)
                 FileSystem.copyFile(file, settings.archiveFolder);

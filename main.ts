@@ -8,16 +8,19 @@ import FileSystemFileUploader from "./fileUploaders/FileSystemFileUploader";
 
 const argv = yargs.command("archive", "Archive recent clips.")
     .command("upload", "Upload clips.")
-    .command("reload", "Reload mass storage.")
+    // .command("reload", "Reload mass storage.")
     .demandCommand(1, 1)
     .scriptName("main.ts")
     .strict()
     .help()
     .argv;
 
+const command = argv._.find(e => ["archive", "upload"].includes(e));
+
 const settings = getSettings();
 const logger = pino({
-    level: settings.logLevel
+    level: settings.logLevel,
+    name: command
 });
 
 const system = new System(logger);
@@ -31,10 +34,9 @@ function main() {
 
     if (argv._.includes("archive")) {
         archiver.archive();
+        system.reloadMassStorage();
     } else if (argv._.includes("upload")) {
         uploader.upload();
-    } else if (argv._.includes("reload")) {
-        system.reloadMassStorage();
     }
 }
 
