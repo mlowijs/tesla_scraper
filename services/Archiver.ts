@@ -45,6 +45,11 @@ export default class Archiver {
     private archiveRecentClips() {
         const { logger, settings } = this;
 
+        if (!settings.archiveRecent) {
+            logger.debug("Skipping recent clips");
+            return;
+        }
+
         logger.info("Archiving recent clips");
 
         const recentClipsPath = `${settings.usbMountFolder}/${TESLA_CAM}/${RECENT_CLIPS}`;
@@ -66,6 +71,11 @@ export default class Archiver {
 
     private archiveSavedClips() {
         const { logger, settings } = this;
+
+        if (!settings.archiveSaved) {
+            logger.debug("Skipping saved clips");
+            return;
+        }
 
         logger.info("Archiving saved clips");        
 

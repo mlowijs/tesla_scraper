@@ -10,6 +10,8 @@ export interface Settings {
     usbMountFolder: string;
     archiveFolder: string;
     processDelayMinutes: number;
+    archiveRecent: boolean;
+    archiveSaved: boolean;
 }
 
 export default function getSettings(): Settings {
